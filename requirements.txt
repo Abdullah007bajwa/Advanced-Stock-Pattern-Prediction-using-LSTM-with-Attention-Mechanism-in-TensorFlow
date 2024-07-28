@@ -1,0 +1,8 @@
+Flask>=2.1.2
+numpy>=1.22.4
+pandas>=1.4.2
+yfinance>=0.1.70
+scikit-learn>=1.1.1
+tensorflow>=2.9.1
+keras>=2.9.0
+mplfinance>=0.12.9b0

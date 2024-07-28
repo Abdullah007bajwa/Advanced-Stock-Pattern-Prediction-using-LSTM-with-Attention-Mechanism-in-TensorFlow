@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Price Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Stock Price Predictor</h1>
+        <form id="predictionForm">
+            <label for="stock_symbol">Stock Symbol:</label>
+            <input type="text" id="stock_symbol" name="stock_symbol" required>
+            <label for="input_date">Date (YYYY-MM-DD):</label>
+            <input type="date" id="input_date" name="input_date" required>
+            <button type="submit">Predict</button>
+        </form>
+        <div id="results"></div>
+        <canvas id="predictionChart"></canvas>
+    </div>
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const stockSymbol = document.getElementById('stock_symbol').value;
+            const inputDate = document.getElementById('input_date').value;
+            
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ stock_symbol: stockSymbol, input_date: inputDate })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('results').innerText = data.error;
+                } else {
+                    const predictions = data.predictions;
+                    document.getElementById('results').innerText = `Predicted Prices:\n${JSON.stringify(predictions, null, 2)}`;
+                    displayChart(predictions);
+                }
+            });
+        });
+
+        function displayChart(predictions) {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            const labels = Object.keys(predictions);
+            const data = Object.values(predictions);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Predicted Prices',
+                        data: data,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 2,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
