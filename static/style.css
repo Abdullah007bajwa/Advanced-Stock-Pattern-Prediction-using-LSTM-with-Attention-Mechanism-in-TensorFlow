@@ -1,25 +1,24 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
+    background-color: #1e1e2f; /* Dark background */
+    color: #f4f4f9; /* Light text color */
     margin: 0;
     padding: 0;
 }
 
 .container {
     max-width: 600px;
-    max-height: 400px;
     margin: 50px auto;
     padding: 20px;
-    background: #fff;
+    background: #2e2e3a; /* Darker card background */
     border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
     text-align: center;
 }
 
 h1 {
     margin-bottom: 20px;
-    color: #141514;
+    color: #f4f4f9;
 }
 
 form {
@@ -31,6 +30,7 @@ form {
 label {
     margin: 10px 0 5px;
     font-weight: bold;
+    color: #f4f4f9;
 }
 
 input, button {
@@ -39,23 +39,25 @@ input, button {
     margin: 5px 0 20px;
     border-radius: 5px;
     border: 1px solid #ccc;
+    background-color: #3e3e4f; /* Input background */
+    color: #f4f4f9; /* Input text color */
 }
 
 input:focus, button:focus {
     outline: none;
-    border-color: #a0899e;
+    border-color: #4a4a6d;
 }
 
 button {
-    background-color: #a0899e;
-    color: white;
+    background-color: #5a5a7e; /* Button background */
+    color: #f4f4f9;
     border: none;
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #812f7a;
+    background-color: #3a3a5d; /* Button hover background */
 }
 
 #results {
@@ -66,4 +68,7 @@ button:hover {
 canvas {
     width: 100% !important;
     height: 400px !important;
+    background-color: #2e2e3a; /* Canvas background */
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }

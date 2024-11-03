@@ -48,7 +48,10 @@ def predict():
 
     prediction_dates = pd.date_range(start=pd.to_datetime(input_date) + pd.Timedelta(days=1), periods=4)
 
-    return jsonify({'predictions': {str(date.date()): pred for date, pred in zip(prediction_dates, predictions)}})
+    return jsonify({
+    'predictions': {str(date.date()): float(pred) for date, pred in zip(prediction_dates, predictions)}
+})
+
 
 if __name__ == '__main__':
     app.run(debug=True)

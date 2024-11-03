@@ -18,62 +18,41 @@
             <button type="submit">Predict</button>
         </form>
         <div id="results"></div>
-        <canvas id="predictionChart"></canvas>
     </div>
-    <script>
-        document.getElementById('predictionForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const stockSymbol = document.getElementById('stock_symbol').value;
-            const inputDate = document.getElementById('input_date').value;
-            
-            fetch('/predict', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ stock_symbol: stockSymbol, input_date: inputDate })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    document.getElementById('results').innerText = data.error;
-                } else {
-                    const predictions = data.predictions;
-                    document.getElementById('results').innerText = `Predicted Prices:\n${JSON.stringify(predictions, null, 2)}`;
-                    displayChart(predictions);
-                }
-            });
+<script>
+    document.getElementById('predictionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const stockSymbol = document.getElementById('stock_symbol').value;
+        const inputDate = document.getElementById('input_date').value;
+        
+        fetch('/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ stock_symbol: stockSymbol, input_date: inputDate })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('results').innerText = data.error;
+                return;
+            }
+
+            const predictions = data.predictions;
+            if (!predictions || typeof predictions !== 'object') {
+                document.getElementById('results').innerText = 'No predictions available.';
+                return;
+            }
+
+            document.getElementById('results').innerText = `Predicted Prices:\n${JSON.stringify(predictions, null, 2)}`;
+        })
+        .catch(err => {
+            console.error('Error fetching prediction:', err);
+            document.getElementById('results').innerText = 'Error fetching prediction. Check console for details.';
         });
+    });
+</script>
 
-        function displayChart(predictions) {
-            const ctx = document.getElementById('predictionChart').getContext('2d');
-            const labels = Object.keys(predictions);
-            const data = Object.values(predictions);
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Predicted Prices',
-                        data: data,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        borderWidth: 2,
-                        fill: false
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'day'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    </script>
 </body>
 </html>
