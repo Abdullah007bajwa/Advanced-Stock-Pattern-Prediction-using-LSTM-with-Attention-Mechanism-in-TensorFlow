@@ -1,46 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Add Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>StockVision AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.0.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.1.0"></script>
 </head>
 <body>
-    <!-- Updated form with icons -->
-    <form id="predictionForm" class="prediction-form">
-        <div class="input-group">
-            <i class="fas fa-chart-line input-icon"></i>
-            <input type="text" id="stock_symbol" name="stock_symbol" required 
-                   placeholder="AAPL" class="form-input">
+    <main class="container">
+        <div class="glass-card">
+            <header class="header">
+                <h1 class="title-gradient">StockVision AI</h1>
+                <p class="subheader">Predictive Market Analytics</p>
+            </header>
+
+            <form id="predictionForm" class="prediction-form">
+                <div class="input-group">
+                    <input type="text" id="stock_symbol" name="stock_symbol" required 
+                           placeholder="Enter ticker (e.g., AAPL)" class="form-input">
+                    <span class="input-icon">$</span>
+                </div>
+                
+                <div class="input-group">
+                    <input type="date" id="input_date" name="input_date" required class="form-input">
+                    <span class="input-icon">📅</span>
+                </div>
+
+                <button type="submit" class="predict-button">
+                    <span class="button-content">Generate Forecast</span>
+                    <div class="button-gradient"></div>
+                </button>
+            </form>
+
+            <div class="visualization-container">
+                <div class="chart-container">
+                    <canvas id="forecastChart"></canvas>
+                </div>
+                <div class="predictions-grid" id="predictionsGrid"></div>
+            </div>
+
+            <div class="error-container" id="errorContainer"></div>
         </div>
+    </main>
+
+    <script>
+    let forecastChart = null;
+
+    document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const stockSymbol = document.getElementById('stock_symbol').value.toUpperCase();
+        const inputDate = document.getElementById('input_date').value;
+        const errorContainer = document.getElementById('errorContainer');
+        errorContainer.innerHTML = '';
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ stock_symbol: stockSymbol, input_date: inputDate })
+            });
+
+            const data = await response.json();
+            
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+
+            updateVisualization(data.predictions);
+        } catch (error) {
+            showError('Network error - please try again');
+            console.error('Fetch error:', error);
+        }
+    });
+
+    function updateVisualization(predictions) {
+        const dates = Object.keys(predictions);
+        const values = Object.values(predictions);
         
-        <div class="input-group">
-            <i class="fas fa-calendar-alt input-icon"></i>
-            <input type="date" id="input_date" name="input_date" required class="form-input">
-        </div>
+        // Update chart
+        if (forecastChart) forecastChart.destroy();
+        
+        const ctx = document.getElementById('forecastChart').getContext('2d');
+        forecastChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Price Forecast',
+                    data: values,
+                    borderColor: '#00ff88',
+                    tension: 0.4,
+                    pointRadius: 4,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: { unit: 'day' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Price (USD)' },
+                        grid: { color: 'rgba(255,255,255,0.1)' }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(15,22,36,0.9)'
+                    }
+                }
+            }
+        });
 
-        <button type="submit" class="predict-button">
-            <span class="button-content">
-                <i class="fas fa-rocket"></i>
-                Generate Forecast
-            </span>
-            <div class="button-gradient"></div>
-        </button>
-    </form>
+        // Update prediction cards
+        const grid = document.getElementById('predictionsGrid');
+        grid.innerHTML = dates.map(date => `
+            <div class="prediction-card">
+                <div class="card-date">${new Date(date).toLocaleDateString()}</div>
+                <div class="card-price">$${predictions[date].toFixed(2)}</div>
+                <div class="card-change"></div>
+            </div>
+        `).join('');
+    }
 
-    <!-- Loading indicator -->
-    <div class="loading-indicator" id="loadingIndicator">
-        <div class="spinner"></div>
-        <div class="loading-text">Analyzing Market Patterns...</div>
-        <div class="loading-hints">
-            <div class="hint-item">
-                <i class="fas fa-microchip"></i>
-                Calculating LSTM Attention Weights
+    function showError(message) {
+        const errorContainer = document.getElementById('errorContainer');
+        errorContainer.innerHTML = `
+            <div class="error-message">
+                ⚠️ ${message}
             </div>
-            <div class="hint-item">
-                <i class="fas fa-wave-square"></i>
-                Analyzing Historical Volatility
-            </div>
-        </div>
-    </div>
+        `;
+    }
+    </script>
 </body>
 </html>
