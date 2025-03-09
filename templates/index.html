@@ -1,58 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Price Predictor</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Stock Price Predictor</h1>
-        <form id="predictionForm">
-            <label for="stock_symbol">Stock Symbol:</label>
-            <input type="text" id="stock_symbol" name="stock_symbol" required>
-            <label for="input_date">Date (YYYY-MM-DD):</label>
-            <input type="date" id="input_date" name="input_date" required>
-            <button type="submit">Predict</button>
-        </form>
-        <div id="results"></div>
-    </div>
-<script>
-    document.getElementById('predictionForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const stockSymbol = document.getElementById('stock_symbol').value;
-        const inputDate = document.getElementById('input_date').value;
+    <!-- Updated form with icons -->
+    <form id="predictionForm" class="prediction-form">
+        <div class="input-group">
+            <i class="fas fa-chart-line input-icon"></i>
+            <input type="text" id="stock_symbol" name="stock_symbol" required 
+                   placeholder="AAPL" class="form-input">
+        </div>
         
-        fetch('/predict', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ stock_symbol: stockSymbol, input_date: inputDate })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                document.getElementById('results').innerText = data.error;
-                return;
-            }
+        <div class="input-group">
+            <i class="fas fa-calendar-alt input-icon"></i>
+            <input type="date" id="input_date" name="input_date" required class="form-input">
+        </div>
 
-            const predictions = data.predictions;
-            if (!predictions || typeof predictions !== 'object') {
-                document.getElementById('results').innerText = 'No predictions available.';
-                return;
-            }
+        <button type="submit" class="predict-button">
+            <span class="button-content">
+                <i class="fas fa-rocket"></i>
+                Generate Forecast
+            </span>
+            <div class="button-gradient"></div>
+        </button>
+    </form>
 
-            document.getElementById('results').innerText = `Predicted Prices:\n${JSON.stringify(predictions, null, 2)}`;
-        })
-        .catch(err => {
-            console.error('Error fetching prediction:', err);
-            document.getElementById('results').innerText = 'Error fetching prediction. Check console for details.';
-        });
-    });
-</script>
-
+    <!-- Loading indicator -->
+    <div class="loading-indicator" id="loadingIndicator">
+        <div class="spinner"></div>
+        <div class="loading-text">Analyzing Market Patterns...</div>
+        <div class="loading-hints">
+            <div class="hint-item">
+                <i class="fas fa-microchip"></i>
+                Calculating LSTM Attention Weights
+            </div>
+            <div class="hint-item">
+                <i class="fas fa-wave-square"></i>
+                Analyzing Historical Volatility
+            </div>
+        </div>
+    </div>
 </body>
 </html>
